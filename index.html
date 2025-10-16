@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>B935016 고영광</title>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 / ReactDOM 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel (브라우저에서 JSX 변환) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>html,body{background:#000}</style>
+</head>
+<body class="bg-black text-white">
+  <div id="root"></div>
+
+  <!-- 🔽 여기에 앱 코드(JSX) 들어갑니다 -->
+  <script type="text/babel">
+    /***** 여기서부터 앱 코드 *****/
+    // ▶ 이미 캔버스에 있는 최신 코드를 쓰고 싶다면:
+    //   - 맨 위의 `import React from "react"` 삭제
+    //   - 맨 아래의 `export default ...` 삭제
+    //   - 마지막에 ReactDOM.createRoot(...).render(<AppWrapper />) 추가
+    // ▶ 간단히 테스트 가능한 미니 버전(동작 확인용):
+
+    const defaultWorks = [
+      { id: 1, key: "Dubhe",  label: "프로필", desc: "소개 / 연락처 / 링크", href: "/profile/",   deck: [] },
+      { id: 2, key: "Merak",  label: "2-2",   desc: "프로젝트 2-2",       href: "/work/2-2/",  deck: [] },
+      { id: 3, key: "Phecda", label: "3-1",   desc: "프로젝트 3-1",       href: "/work/3-1/",  deck: [] },
+      { id: 4, key: "Megrez", label: "3-2",   desc: "프로젝트 3-2",       href: "/work/3-2/",  deck: [] },
+      { id: 5, key: "Alioth", label: "4-1",   desc: "프로젝트 4-1",       href: "/work/4-1/",  deck: [] },
+      { id: 6, key: "Mizar",  label: "4-2",   desc: "프로젝트 4-2",       href: "/work/4-2/",  deck: [] },
+      { id: 7, key: "Alkaid", label: "5-1",   desc: "Co-siwon",           href: "/work/5-1/",  deck: [] },
+    ];
+
+    const starLayout = [
+      { id: 1, x: 10, y: 20 }, { id: 2, x: 16, y: 50 }, { id: 3, x: 36, y: 60 },
+      { id: 4, x: 47, y: 40 }, { id: 5, x: 62, y: 34 }, { id: 6, x: 73, y: 30 },
+      { id: 7, x: 86, y: 36 },
+    ];
+    const mergeWorksWithLayout = (works) => starLayout.map((p,i)=>({ ...p, ...(works[i]||{}), index:i }));
+
+    function App(){
+      const [items] = React.useState(defaultWorks);
+      const aspectK = 16/9;
+      const nodes = React.useMemo(()=>{
+        const base = mergeWorksWithLayout(items).map(n=>({ ...n, x: n.x*aspectK }));
+        const cx=(100*aspectK)/2, cy=50, sX=0.85, s=0.8;
+        const adj = base.map(n=>({ ...n, x: cx+(n.x-cx)*sX }));
+        return adj.map(n=>({ ...n, x: cx+(n.x-cx)*s, y: cy+(n.y-cy)*s }));
+      },[items]);
+      const points = nodes.map(n => `${n.x},${n.y}`).join(' ');
+
+      return (
+        <main className="relative min-h-screen w-full bg-black text-white overflow-hidden">
+          <header className="mx-auto max-w-5xl px-6 pt-10 pb-4 flex items-center justify-between">
+            <h1 className="text-2xl md:text-3xl font-semibold">B935016 고영광</h1>
+            <div className="text-sm text-white/70 flex items-center gap-2">
+              <span>⭐</span><span>별을 클릭하면 프로젝트로 이동합니다</span>
+            </div>
+          </header>
+
+          <section className="relative z-10 mx-auto max-w-5xl w-full px-4 pb-16">
+            <div className="relative w-full rounded-2xl border border-white/10 shadow-2xl overflow-hidden" style={{ aspectRatio:'16/9' }}>
+              <svg viewBox={`0 0 ${100*aspectK} 100`} preserveAspectRatio="xMidYMid meet" className="h-full w-full">
+                <defs>
+                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="1.1" result="b" />
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+
+                <!-- 배경(Unsplash 기본) -->
+                <image href="https://images.unsplash.com/photo-1523986371872-9d3ba2e2b1b9?q=80&w=1600&auto=format&fit=crop"
+                       x="0" y="0" width={100*aspectK} height="100"
+                       preserveAspectRatio="xMidYMid slice" />
+
+                <!-- 연결선 -->
+                <polyline points={points} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.55" filter="url(#glow)" />
+                <polyline points={points} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="0.35" filter="url(#glow)" />
+
+                {/* 노드 */}
+                {nodes.map((n, idx)=>(
+                  <g key={idx} transform={`translate(${n.x} ${n.y})`} style={{cursor:'pointer'}}
+                     onClick={()=>window.open(items[idx]?.href || '#', '_blank', 'noreferrer')}>
+                    <title>{items[idx]?.label || ''}</title>
+                    <circle r="1.15" fill="rgba(255,255,255,0.2)"/>
+                    <circle r="0.48" fill="#fff" filter="url(#glow)"/>
+                    <circle r="4.8" fill="transparent" />
+                  </g>
+                ))}
+              </svg>
+            </div>
+          </section>
+        </main>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    /***** 여기까지 앱 코드 *****/
+  </script>
+</body>
+</html>
